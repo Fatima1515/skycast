@@ -1,65 +1,169 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState } from "react";
+
+export default function Page() {
+  const [city, setCity] = useState("");
+  const [weather, setWeather] = useState<any>(null);
+  const [forecast, setForecast] = useState<any[]>([]);
+  const [error, setError] = useState("");
+
+  const API_KEY = "3266294a54069c69430c2e44b5fd1b2f";
+
+  async function getWeather() {
+    if (!city) return;
+
+    try {
+      setError("");
+      setWeather(null);
+      setForecast([]);
+
+      // GET CURRENT WEATHER
+      const res = await fetch(
+        `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`
+      );
+
+      if (!res.ok) {
+        setError("City not found");
+        return;
+      }
+
+      const data = await res.json();
+      setWeather(data);
+
+      // GET 5-DAY FORECAST
+      const forecastRes = await fetch(
+        `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${API_KEY}&units=metric`
+      );
+
+      const forecastData = await forecastRes.json();
+
+      const daily = forecastData.list.filter((item: any) =>
+        item.dt_txt.includes("12:00:00")
+      );
+
+      setForecast(daily);
+    } catch {
+      setError("Something went wrong.");
+    }
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div
+      className="min-h-screen p-8 flex flex-col items-center"
+      style={{
+        background: "linear-gradient(to bottom right, #fbc2eb, #a6c1ee)",
+      }}
+    >
+      {/* HEADER */}
+      <h1 className="text-5xl font-bold mb-10 flex items-center gap-3 text-gray-900 drop-shadow-md">
+        🌤️ SkyCast
+      </h1>
+
+      {/* SEARCH BAR */}
+      <div className="flex gap-3 w-full max-w-md mb-8">
+        <input
+          className="w-full rounded-2xl px-5 py-3 text-lg shadow-lg border border-white/40 bg-white/50 backdrop-blur-xl focus:outline-none"
+          placeholder="Search for a city..."
+          value={city}
+          onChange={(e) => setCity(e.target.value)}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+        <button
+          onClick={getWeather}
+          className="px-6 py-3 rounded-2xl text-lg bg-blue-600 text-white shadow-lg hover:bg-blue-700 transition"
+        >
+          Search
+        </button>
+      </div>
+
+      {/* ERROR */}
+      {error && (
+        <p className="text-red-700 text-lg font-semibold mb-4">{error}</p>
+      )}
+
+      {/* CURRENT WEATHER CARD */}
+      {weather && (
+        <div
+          className="w-full max-w-md p-8 rounded-3xl shadow-2xl mb-12 text-white"
+          style={{
+            background:
+              "linear-gradient(to bottom right, rgba(255,255,255,0.35), rgba(255,255,255,0.15))",
+            backdropFilter: "blur(14px)",
+            border: "1px solid rgba(255,255,255,0.4)",
+          }}
+        >
+          <h2 className="text-4xl font-bold mb-4 text-gray-900">
+            {weather.name}, {weather.sys.country}
+          </h2>
+
+          {/* EVERYTHING ALIGNED PERFECTLY IN ONE COLUMN */}
+          <div className="flex flex-col items-start gap-3 text-gray-900">
+            {/* description */}
+            <p className="text-xl capitalize">{weather.weather[0].description}</p>
+
+            {/* temperature */}
+            <p className="text-6xl font-extrabold">{Math.round(weather.main.temp)}°C</p>
+
+            {/* humidity */}
+            <div className="flex items-center gap-2 text-blue-700 text-xl">
+              💧 <span className="font-semibold">{weather.main.humidity}%</span>
+            </div>
+
+            {/* wind */}
+            <div className="flex items-center gap-2 text-purple-700 text-xl">
+              🌬 <span className="font-semibold">{weather.wind.speed} m/s</span>
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      )}
+
+      {/* 5-DAY FORECAST */}
+      {forecast.length > 0 && (
+        <div className="w-full max-w-4xl">
+          <h2 className="text-4xl font-bold mb-6 text-gray-900 text-center drop-shadow-md">
+            5-Day Forecast
+          </h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+            {forecast.map((day: any, i: number) => (
+              <div
+                key={i}
+                className="p-5 rounded-3xl text-center shadow-xl hover:scale-105 transition cursor-pointer"
+                style={{
+                  background:
+                    "linear-gradient(to bottom right, rgba(255,255,255,0.45), rgba(255,255,255,0.25))",
+                  backdropFilter: "blur(12px)",
+                  border: "1px solid rgba(255,255,255,0.5)",
+                }}
+              >
+                <p className="font-semibold text-gray-800 text-lg">
+                  {new Date(day.dt_txt).toLocaleDateString("en-US", {
+                    weekday: "short",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </p>
+
+                <p className="text-5xl my-3">
+                  {day.weather[0].main === "Clouds" && "☁️"}
+                  {day.weather[0].main === "Clear" && "☀️"}
+                  {day.weather[0].main === "Rain" && "🌧️"}
+                  {day.weather[0].main === "Snow" && "❄️"}
+                  {day.weather[0].main === "Fog" && "🌫️"}
+                </p>
+
+                <p className="capitalize text-gray-700 text-sm mb-3">
+                  {day.weather[0].description}
+                </p>
+
+                <p className="text-3xl font-bold text-gray-900">
+                  {Math.round(day.main.temp)}°C
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
-      </main>
+      )}
     </div>
   );
 }

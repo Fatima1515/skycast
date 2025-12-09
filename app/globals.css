@@ -1,26 +1,50 @@
-@import "tailwindcss";
+/* Pink & Blue Aesthetic Theme */
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --pink: #ffd3e8;
+  --blue: #b3e5ff;
+  --dark-blue: #4f7caf;
+  --white: #ffffff;
+  --black: #222222;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+
+  /* Pink → Blue gradient */
+  background: linear-gradient(135deg, var(--pink), var(--blue));
+  background-attachment: fixed;
+
+  min-height: 100vh;
+  color: var(--black);
 }
+
+/* Center items automatically */
+main, div, section {
+  box-sizing: border-box;
+}
+
+/* Cute buttons */
+button {
+  background-color: var(--dark-blue);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+button:hover {
+  opacity: 0.85;
+}
+
+/* Input styling */
+input {
+  padding: 10px;
+  border-radius: 8px;
+  border: 2px solid var(--dark-blue);
+}
+
